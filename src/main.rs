@@ -1,36 +1,40 @@
-use actix_protobuf::*;
-use actix_web::*;
-use prost::Message as Message;
+use tonic::{transport::Server, Request, Response, Status};
 
-// Include the `items` module, which is generated from items.proto.
-pub mod items {
-    include!(concat!(env!("OUT_DIR"), "/user.items.rs"));
+use hello_world::greeter_server::{Greeter, GreeterServer};
+use hello_world::{HelloReply, HelloRequest};
+
+pub mod hello_world {
+    tonic::include_proto!("helloworld");
 }
 
-/*
-#[derive(Debug)]
-struct RegisterDto {
-    #[prost(string, tag="email")]
-    email: String,
+#[derive(Debug, Default)]
+pub struct MyGreeter {}
 
-    #[prost(string, tag="password")]
-    password: String,
+#[tonic::async_trait]
+impl Greeter for MyGreeter {
+    async fn say_hello(
+        &self,
+        request: Request<HelloRequest>,
+    ) -> Result<Response<HelloReply>, Status> {
+        println!("Got a request: {:?}", request);
+
+        let reply = hello_world::HelloReply {
+            message: format!("Hello {}!", request.into_inner().name).into(),
+        };
+
+        Ok(Response::new(reply))
+    }
 }
- */
 
-async fn register(message: ProtoBuf<items::Register>) -> Result<HttpResponse> {
-    println!("Registering: {:?}", message);
-    HttpResponse::Ok().protobuf(message.0)
-}
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "[::1]:50051".parse()?;
+    let greeter = MyGreeter::default();
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=debug,actix_server=info");
-    env_logger::init();
-    HttpServer::new(|| {
-        App::new()
-            .wrap(middleware::Logger::default())
-            .service(web::resource("/register").route(web::post().to(register)))
-    })
-        .bind("127.0.0.1:8080")?.shutdown_timeout(1).run().await
+    Server::builder()
+        .add_service(GreeterServer::new(greeter))
+        .serve(addr)
+        .await?;
+
+    Ok(())
 }
