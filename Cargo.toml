@@ -7,8 +7,12 @@ edition = "2021"
 tonic = { version = "0.6.1", features = ["compression"]}
 prost = "0.9.0"
 tokio = { version = "1.13.0" , features = ["macros", "rt-multi-thread"]}
-diesel = { version = "1.4.4", features = ["postgres"] }
+diesel = { version = "1.4.4", features = ["postgres", "uuidv07", "chrono", "r2d2"] }
 dotenv = "0.15.0"
+uuid = { version = "=0.8.1", features = ["serde", "v4"] }
+chrono = { version = "0.4.19", features = ["serde"]}
+r2d2 = "0.8.9"
+env_logger = "0.9.0"
 
 [build-dependencies]
 tonic-build = {version= "0.6", features = ["prost", "compression"]}
