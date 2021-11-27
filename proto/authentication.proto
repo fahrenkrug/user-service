@@ -6,6 +6,7 @@ service Authentication {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc ForgotPassword (ForgotPasswordRequest) returns (ForgotPasswordResponse);
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc Me (UserRequest) returns (UserResponse);
 }
 
 message LoginRequest {
@@ -21,7 +22,7 @@ message RegisterRequest {
   string email = 1;
   string password = 2;
   string firstName = 3;
-  string familyName = 4;
+  string lastName = 4;
 }
 
 message RegisterResponse {
@@ -45,3 +46,7 @@ message ChangePasswordRequest {
 message ChangePasswordResponse {
   string token = 1;
 }
+
+message UserRequest {}
+
+message UserResponse {}

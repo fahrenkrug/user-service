@@ -12,7 +12,11 @@ dotenv = "0.15.0"
 uuid = { version = "=0.8.1", features = ["serde", "v4"] }
 chrono = { version = "0.4.19", features = ["serde"]}
 r2d2 = "0.8.9"
-env_logger = "0.9.0"
+tonic-web = "0.2.0"
+tracing-subscriber = {version = "0.3.2", features = ["tracing-log"]}
+rust-argon2 = "0.8"
+futures = "0.3.18"
+rand = "0.8.4"
 
 [build-dependencies]
 tonic-build = {version= "0.6", features = ["prost", "compression"]}
