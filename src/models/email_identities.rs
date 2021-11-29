@@ -33,7 +33,7 @@ impl<'a > NewEmailIdentity<'a > {
             id: None,
             user_id,
             hash,
-            email: String::from(email),
+            email: email.to_owned(),
             created_at: None,
             updated_at: None,
         }

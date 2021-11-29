@@ -34,3 +34,22 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION manage_created_at(_tbl regclass) RETURNS VOID AS $$
+BEGIN
+    EXECUTE format('CREATE TRIGGER prevent_created_at BEFORE UPDATE ON %s
+                    FOR EACH ROW EXECUTE PROCEDURE prevent_created_at_change()', _tbl);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION prevent_created_at_change() RETURNS trigger language plpgsql as $$
+BEGIN
+    IF (
+        NEW IS DISTINCT FROM OLD AND
+        NEW.created_at IS DISTINCT FROM OLD.created_at
+    ) THEN
+        RAISE EXCEPTION 'cannot change created_at';
+    END IF;
+    RETURN NEW;
+END $$;

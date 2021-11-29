@@ -1,6 +1,8 @@
-mod email_identity;
+mod email_identity_service;
 mod handler;
+mod token_service;
 
+// mod jwt_service;
 use tonic::{Request, Response, Status};
 use authentication::authentication_server::{Authentication};
 use authentication::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, ForgotPasswordRequest, ForgotPasswordResponse, ChangePasswordRequest, ChangePasswordResponse, UserRequest, UserResponse};

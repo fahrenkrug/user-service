@@ -2,7 +2,7 @@ use tonic::{Request, Response, Status};
 use crate::Pool;
 use super::super::authentication::{RegisterRequest, RegisterResponse};
 use crate::models::users::{NewUser, User};
-use super::super::email_identity::EmailIdentityService;
+use super::super::email_identity_service::EmailIdentityService;
 use diesel::prelude::*;
 
 pub fn respond(pool: &Pool, request: Request<RegisterRequest>,) -> Result<Response<RegisterResponse>, Status> {
