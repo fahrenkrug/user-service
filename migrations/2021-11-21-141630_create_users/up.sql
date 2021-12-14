@@ -12,7 +12,7 @@ CREATE TABLE users (
 CREATE TABLE email_identities (
     id uuid DEFAULT uuid_generate_v4(),
     user_id uuid NOT NULL,
-    email VARCHAR NOT NULL UNIQUE ,
+    email VARCHAR NOT NULL UNIQUE,
     hash VARCHAR NOT NULL,
     created_at timestamptz NOT NULL DEFAULT NOW(),
     updated_at timestamptz NOT NULL DEFAULT NOW(),

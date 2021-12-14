@@ -3,11 +3,16 @@ use crate::Pool;
 use super::super::authentication::{RegisterRequest, RegisterResponse};
 use crate::models::users::{NewUser, User};
 use super::super::email_identity_service::EmailIdentityService;
-use diesel::prelude::*;
+use crate::diesel::RunQueryDsl;
 
-pub fn respond(pool: &Pool, request: Request<RegisterRequest>,) -> Result<Response<RegisterResponse>, Status> {
+pub async fn respond(pool: &Pool, request: Request<RegisterRequest>,) -> Result<Response<RegisterResponse>, Status> {
     println!("Got register request: {:?}", request);
     let request_data = request.into_inner();
+    let password_service = EmailIdentityService::new();
+    let does_exist = password_service.does_email_exist(pool, &request_data.email).await;
+    if does_exist {
+        return Err(Status::already_exists("A user with this email already exists"))
+    }
     let new_user = new_user_from_request(&request_data);
     let user: User = store_user(pool, &new_user);
     let pool = pool.clone();

@@ -1,10 +1,11 @@
 use argon2::{self, Config};
-use diesel::RunQueryDsl;
+use diesel::dsl::exists;
 use rand::distributions::Standard;
 use rand::Rng;
 use uuid::Uuid;
 use crate::models::email_identities::NewEmailIdentity;
 use crate::Pool;
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
 pub struct EmailIdentityService {
     config: Config<'static >,
@@ -41,6 +42,12 @@ impl EmailIdentityService {
         let connection = pool.get().unwrap();
         diesel::insert_into(email_identities::table).values(&new_email_identity).execute(&connection).expect("Error storing password");
         println!("Stored password")
+    }
+
+    pub async fn does_email_exist(&self, pool: &Pool, user_email: &str) -> bool {
+        use super::super::schema::email_identities::dsl::*;
+        let connection = pool.get().unwrap();
+        diesel::select(exists(email_identities.filter(email.eq(user_email)))).get_result(&connection).expect("Error accessing email identity")
     }
 
     fn generate_random_salt() -> Vec<u8> {

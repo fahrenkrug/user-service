@@ -1,7 +1,7 @@
 extern crate dotenv;
 #[macro_use] extern crate diesel;
-pub mod schema;
 pub mod models;
+pub mod schema;
 use tonic::{transport::Server};
 use diesel::{PgConnection, r2d2::ConnectionManager};
 use dotenv::dotenv;

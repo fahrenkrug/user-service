@@ -2,7 +2,6 @@ mod email_identity_service;
 mod handler;
 mod token_service;
 
-// mod jwt_service;
 use tonic::{Request, Response, Status};
 use authentication::authentication_server::{Authentication};
 use authentication::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, ForgotPasswordRequest, ForgotPasswordResponse, ChangePasswordRequest, ChangePasswordResponse, UserRequest, UserResponse};
@@ -35,7 +34,7 @@ impl Authentication for AuthenticationService {
     }
 
     async fn register(&self, request: Request<RegisterRequest>,) -> Result<Response<RegisterResponse>, Status> {
-        handler::register::respond(&self.pool, request)
+        handler::register::respond(&self.pool, request).await
     }
 
     async fn forgot_password(&self, request: Request<ForgotPasswordRequest>) -> Result<Response<ForgotPasswordResponse>, Status> {
@@ -47,7 +46,7 @@ impl Authentication for AuthenticationService {
     }
 
     async fn me(&self, request: Request<UserRequest>) -> Result<Response<UserResponse>, Status> {
-        handler::me::respond(request)
+        handler::me::respond(&self.pool, request)
     }
 
 }

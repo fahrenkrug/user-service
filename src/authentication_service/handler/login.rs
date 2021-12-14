@@ -33,7 +33,7 @@ fn match_password_with_hash(password: &str, hash: String, user_id: &Uuid) -> Res
         true => {
             let token = create_token(user_id);
             let response = LoginResponse {
-                token: format!("Hello {}!", token),
+                token,
             };
             Ok(Response::new(response))
         },

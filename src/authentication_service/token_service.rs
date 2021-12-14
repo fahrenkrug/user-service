@@ -1,9 +1,9 @@
-use std::env;
+use std::{env};
+use std::fmt::{Display, Formatter};
 use branca::Branca;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{Duration, Utc};
-use rmp_serde::{Serializer};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -37,4 +37,38 @@ pub fn create_token(user_id: &Uuid) -> String {
     let claims = Claims::new(user_id);
     let bytes = rmp_serde::to_vec(&claims).unwrap();
     tokenizer.encode(&bytes).unwrap()
+}
+
+pub fn user_id_from(token: &str) -> Result<String, DecodingError> {
+    Ok(decode_token(token)?.sub)
+}
+
+fn decode_token(token: &str) -> Result<Claims, DecodingError> {
+    let tokenizer = tokenizer();
+    match tokenizer.decode(token, 0) {
+        Ok(token) => serialize_token(&token),
+        Err(e) => {
+            print!("branca error: {}", e);
+            Err(DecodingError)
+        }
+    }
+}
+
+fn serialize_token(token: &[u8]) -> Result<Claims, DecodingError> {
+    match rmp_serde::from_slice::<Claims>(token) {
+        Ok(claims) => Ok(claims),
+        Err(e) => {
+            println!("serialize error: {}", e);
+            Err(DecodingError)
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct DecodingError;
+
+impl Display for DecodingError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "invalid byte string token to decode")
+    }
 }

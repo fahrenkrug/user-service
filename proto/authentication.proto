@@ -49,4 +49,10 @@ message ChangePasswordResponse {
 
 message UserRequest {}
 
-message UserResponse {}
+message UserResponse {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
