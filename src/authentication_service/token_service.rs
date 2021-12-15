@@ -4,6 +4,7 @@ use branca::Branca;
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{Duration, Utc};
+use tonic::{Request, Response, Status};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
@@ -39,7 +40,7 @@ pub fn create_token(user_id: &Uuid) -> String {
     tokenizer.encode(&bytes).unwrap()
 }
 
-pub fn user_id_from(token: &str) -> Result<String, DecodingError> {
+fn user_id_from(token: &str) -> Result<String, DecodingError> {
     Ok(decode_token(token)?.sub)
 }
 
@@ -64,11 +65,52 @@ fn serialize_token(token: &[u8]) -> Result<Claims, DecodingError> {
     }
 }
 
+fn verify_request<T>(request: &Request<T>) -> Result<String, VerificationError> {
+    match request.metadata().get("token") {
+        Some(token) => {
+            match token.to_str() {
+                Err(e) => {
+                    println!("Error transforming metadata into string: ${}", e);
+                    Err(VerificationError)
+                },
+                Ok(token) => user_id_from(token).map_err( |_| VerificationError)
+            }
+        },
+        None => Err(VerificationError)
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct DecodingError;
 
 impl Display for DecodingError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "invalid byte string token to decode")
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct VerificationError;
+
+impl Display for VerificationError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "token is not valid")
+    }
+}
+
+pub fn unauthenticated<T>() -> Result<Response<T>, Status> {
+    let status = unauthenticated_plain();
+    Err(status)
+}
+
+pub fn unauthenticated_plain() -> Status {
+    Status::unauthenticated("Token don't match or is expired or not valid anymore because of account changes.")
+}
+
+type Reply<ResponseBody> = Result<Response<ResponseBody>, Status>;
+pub fn verify<RequestBody, ResponseBody, F>(request: Request<RequestBody>, handler: F) -> Reply<ResponseBody> where F: Fn(RequestBody, String) -> Reply<ResponseBody> {
+    match verify_request(&request) {
+        Err(_) => unauthenticated(),
+        Ok(user_id) => handler(request.into_inner(), user_id)
     }
 }

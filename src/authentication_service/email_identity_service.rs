@@ -4,8 +4,10 @@ use rand::distributions::Standard;
 use rand::Rng;
 use uuid::Uuid;
 use crate::models::email_identities::NewEmailIdentity;
-use crate::Pool;
+use crate::{Pool, PooledConnection};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use tonic::Status;
+use super::token_service;
 
 pub struct EmailIdentityService {
     config: Config<'static >,
@@ -29,6 +31,26 @@ impl EmailIdentityService {
             Err(e) => {
                 println!("Password error during verify: {}", e);
                 false
+            }
+        }
+    }
+
+    pub fn matches_user_id(connection: &PooledConnection, input: &str, user_uuid: &str) -> Result<(bool, String), Status> {
+        use crate::schema::email_identities::dsl::*;
+        match Uuid::parse_str(user_uuid) {
+            Ok(uuid) => {
+                println!("Looking for user with uuid: {}", uuid.to_string());
+                match email_identities.filter((user_id).eq(uuid)).filter(created_at.eq(updated_at)).order(created_at.desc()).select((hash, email)).first::<(String, String)>(connection) {
+                    Ok((password_hash, user_email)) => Ok((EmailIdentityService::matches(input, password_hash), user_email)),
+                    Err(e) => {
+                        println!("error while trying to find user with id: {}", e);
+                        Err(Status::not_found("User with user_id not found"))
+                    }
+                }
+            },
+            Err(e) => {
+                println!("Error parsing uuid: {}", e);
+                Err(token_service::unauthenticated_plain())
             }
         }
     }

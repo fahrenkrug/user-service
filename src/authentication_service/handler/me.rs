@@ -9,46 +9,23 @@ use crate::diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 type MeReply = Result<Response<UserResponse>, Status>;
 
 pub fn respond(pool: &Pool, request: Request<UserRequest>) -> MeReply {
-    match request.metadata().get("token") {
-        Some(token) => {
-            match token.to_str() {
-                Err(e) => {
-                    println!("Error transforming metadata into string: ${}", e);
-                    unauthenticated()
-                },
-                Ok(token) => get_user_for_token(pool, token)
-            }
-        },
-        None => unauthenticated()
-    }
+    token_service::verify(request, |_, user_id| get_user_for_user_id(pool, &user_id))
 }
 
-fn unauthenticated() -> MeReply {
-    Err(Status::unauthenticated("Credentials don't match or user does not exist."))
-}
-
-fn get_user_for_token(pool: &Pool, token: &str) -> MeReply {
-    match token_service::user_id_from(token) {
+fn get_user_for_user_id(pool: &Pool, user_id: &str) -> MeReply {
+    use crate::schema::users::dsl::*;
+    let connection = pool.get().unwrap();
+    match Uuid::parse_str(user_id) {
         Err(e) => {
-            println!("error getting user from token: {}", e);
-            unauthenticated()
+            println!("Error parsing token to uuid: {}", e);
+            token_service::unauthenticated()
         },
-        Ok(user_id) => {
-            use crate::schema::users::dsl::*;
-            let connection = pool.get().unwrap();
-            match Uuid::parse_str(&user_id) {
+        Ok(token) => {
+            match users.filter(id.eq(token)).first::<User>(&connection) {
+                Ok(user) => response_from_user(&user),
                 Err(e) => {
-                    println!("Error parsing token to uuid: {}", e);
-                    unauthenticated()
-                },
-                Ok(token) => {
-                    match users.filter(id.eq(token)).first::<User>(&connection) {
-                        Ok(user) => response_from_user(&user),
-                        Err(e) => {
-                            println!("error loading user from database: {}", e);
-                            unauthenticated()
-                        }
-                    }
+                    println!("error loading user from database: {}", e);
+                    token_service::unauthenticated()
                 }
             }
         }

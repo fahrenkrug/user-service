@@ -42,7 +42,7 @@ impl Authentication for AuthenticationService {
     }
 
     async fn change_password(&self, request: Request<ChangePasswordRequest>,) -> Result<Response<ChangePasswordResponse>, Status> {
-        handler::change_password::respond(request)
+        handler::change_password::respond(&self.pool, request)
     }
 
     async fn me(&self, request: Request<UserRequest>) -> Result<Response<UserResponse>, Status> {
