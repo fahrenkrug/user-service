@@ -32,8 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let authentication_service = AuthenticationService::new(pool.clone());
 
     let authentication_server = AuthenticationServer::new(authentication_service);
-    let authentication_server = tonic_web::config().allow_origins(vec!["127.0.0.1", "localhost"])
-        .enable(authentication_server);
+    let authentication_server = tonic_web::config().enable(authentication_server);
 
     Server::builder()
         .accept_http1(true)

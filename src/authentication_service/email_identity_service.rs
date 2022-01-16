@@ -57,13 +57,10 @@ impl EmailIdentityService {
 
     pub async fn store_email_identity(&self, pool: &Pool, password: &str, user_id: &Uuid, email: &str) {
         use super::super::schema::email_identities;
-        println!("Passowrd is {}", &password);
         let hashed = self.encode(password);
-        println!("Hashed pw is {}", &hashed );
         let new_email_identity = NewEmailIdentity::new(user_id, hashed, email);
         let connection = pool.get().unwrap();
         diesel::insert_into(email_identities::table).values(&new_email_identity).execute(&connection).expect("Error storing password");
-        println!("Stored password")
     }
 
     pub async fn does_email_exist(&self, pool: &Pool, user_email: &str) -> bool {
