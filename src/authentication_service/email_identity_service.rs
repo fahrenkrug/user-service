@@ -39,7 +39,7 @@ impl EmailIdentityService {
         use crate::schema::email_identities::dsl::*;
         match Uuid::parse_str(user_uuid) {
             Ok(uuid) => {
-                println!("Looking for user with uuid: {}", uuid.to_string());
+                println!("Looking for user with uuid: {}", uuid);
                 match email_identities.filter((user_id).eq(uuid)).filter(created_at.eq(updated_at)).order(created_at.desc()).select((hash, email)).first::<(String, String)>(connection) {
                     Ok((password_hash, user_email)) => Ok((EmailIdentityService::matches(input, password_hash), user_email)),
                     Err(e) => {
