@@ -3,28 +3,28 @@ mod handler;
 mod token_service;
 
 use tonic::{Request, Response, Status};
-use authentication::authentication_server::{Authentication};
-use authentication::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, ForgotPasswordRequest, ForgotPasswordResponse, ChangePasswordRequest, ChangePasswordResponse, UserRequest, UserResponse};
+use user::user_server::{User};
+use user::{LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, ForgotPasswordRequest, ForgotPasswordResponse, ChangePasswordRequest, ChangePasswordResponse, UserRequest, UserResponse};
 use crate::Pool;
 
-pub mod authentication {
-    tonic::include_proto!("authentication");
+pub mod user {
+    tonic::include_proto!("user");
 }
 
-pub struct AuthenticationService {
+pub struct UserService {
     pool: Pool,
 }
 
-impl AuthenticationService {
-    pub fn new(pool: Pool) -> AuthenticationService {
-        AuthenticationService{
+impl UserService {
+    pub fn new(pool: Pool) -> UserService {
+        UserService{
             pool,
         }
     }
 }
 
 #[tonic::async_trait]
-impl Authentication for AuthenticationService {
+impl User for UserService {
 
     async fn login(
         &self,

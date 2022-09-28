@@ -30,7 +30,7 @@ impl Claims {
 
 fn tokenizer() -> Branca {
     let key = env::var("TOKEN_SALT").expect("salt must be set");
-    Branca::new(key.as_bytes()).expect("branca initilization failed")
+    Branca::new(key.as_bytes()).expect("branca initialization failed")
 }
 
 pub fn create_token(user_id: &Uuid) -> String {

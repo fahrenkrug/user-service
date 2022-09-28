@@ -1,7 +1,7 @@
 syntax = "proto3";
-package authentication;
+package user;
 
-service Authentication {
+service User {
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc ForgotPassword (ForgotPasswordRequest) returns (ForgotPasswordResponse);

@@ -1,11 +1,11 @@
 use tonic::{Request, Response, Status};
 use crate::{Pool, PooledConnection};
-use super::super::authentication::{LoginRequest, LoginResponse};
+use super::super::user::{LoginRequest, LoginResponse};
 use super::super::token_service::create_token;
 use diesel::prelude::*;
 use diesel::sql_types::Text;
 use uuid::Uuid;
-use crate::authentication_service::email_identity_service::EmailIdentityService;
+use crate::user_service::email_identity_service::EmailIdentityService;
 
 type ResponseResult = Result<Response<LoginResponse>, Status>;
 

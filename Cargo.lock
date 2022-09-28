@@ -1320,6 +1320,7 @@ dependencies = [
  "prost",
  "r2d2",
  "rand 0.8.4",
+ "regex",
  "rmp-serde",
  "rust-argon2",
  "serde",
