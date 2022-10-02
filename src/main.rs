@@ -1,12 +1,13 @@
 extern crate dotenv;
-#[macro_use] extern crate diesel;
+#[macro_use]
+extern crate diesel;
 pub mod models;
 pub mod schema;
-use tonic::{transport::Server};
-use diesel::{PgConnection, r2d2::ConnectionManager};
+use diesel::{r2d2::ConnectionManager, PgConnection};
 use dotenv::dotenv;
 use std::env;
 use std::time::Duration;
+use tonic::transport::Server;
 
 pub type PooledConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
@@ -18,7 +19,11 @@ mod user_service;
 fn new_pool() -> Pool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    r2d2::Pool::builder().min_idle(Some(1)).connection_timeout(Duration::from_secs(60 * 10)).build(manager).expect("Failed to create postgres pool")
+    r2d2::Pool::builder()
+        .min_idle(Some(1))
+        .connection_timeout(Duration::from_secs(60 * 10))
+        .build(manager)
+        .expect("Failed to create postgres pool")
 }
 
 #[tokio::main]
